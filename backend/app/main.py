@@ -5,12 +5,18 @@ Gateway-based monitoring: all telemetry captured at network level.
 No agents installed on endpoints.
 """
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.database import connect_db, close_db, get_db
 from app.routes import logs, alerts
+
+# In production set ALLOWED_ORIGINS to your Vercel URL, e.g.:
+#   ALLOWED_ORIGINS=https://agentshield.vercel.app
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "*")
+ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",")] if _raw_origins != "*" else ["*"]
 
 
 @asynccontextmanager
@@ -32,7 +38,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

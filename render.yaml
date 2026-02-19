@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: agentshield-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: MONGO_URL
+        sync: false   # Set this in Render dashboard → Environment
