@@ -22,4 +22,7 @@ export const fetchLogs = (params = {}) =>
 export const ingestLogs = (logs = null) =>
     api.post('/logs', logs).then(r => r.data)
 
+export const blockAlert = (alertId) =>
+    api.post(`/alerts/${alertId}/block`).then(r => r.data)
+
 export default api

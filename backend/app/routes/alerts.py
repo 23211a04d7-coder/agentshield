@@ -133,3 +133,26 @@ async def get_risk_score(db: AsyncIOMotorDatabase = Depends(get_db)):
         "avg_risk": round(avg, 1),
         "max_risk": max_r,
     }
+
+
+@router.post("/alerts/{alert_id}/block", summary="Block a threat alert")
+async def block_alert(
+    alert_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_db),
+):
+    """POST /alerts/{alert_id}/block — Marks a specific alert as blocked/contained."""
+    from datetime import datetime, timezone
+    blocked_at = datetime.now(timezone.utc).isoformat()
+
+    result = await db.alerts.find_one_and_update(
+        {"alert_id": alert_id},
+        {"$set": {"status": "blocked", "blocked_at": blocked_at}},
+        return_document=True,
+    )
+    if result is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=f"Alert {alert_id} not found")
+
+    # Strip MongoDB _id before returning
+    result.pop("_id", None)
+    return {"message": "Threat blocked successfully", "alert": result}
